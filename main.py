@@ -17,7 +17,7 @@ accounts_checked=set() #accounts that have already been analyzed
 pages=2 # 1 page = 100 tweets
 min_keywords=10 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
-sleep_time=2
+sleep_time=2.05 #sleep time between requests
 
 def get_id_from_username(name):
     user = client.get_user(username=name)
