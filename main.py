@@ -17,15 +17,22 @@ accounts_checked=set() #accounts that have already been analyzed
 pages=2 # 1 page = 100 tweets
 min_keywords=10 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
-sleep_time=2.05 #sleep time between requests
+sleep_time=2 #sleep time between requests
+sleep_count=0 #how many times it slept, for debugging purposes
+
+def sleep():
+    global sleep_count
+    #time.sleep(sleep_time)
+    sleep_count+=1
+    print(sleep_count)
 
 def get_id_from_username(name):
     user = client.get_user(username=name)
-    time.sleep(sleep_time)
+    sleep()
     return user.data.id
 
 def get_user_id_from_tweet(x):
-    time.sleep(sleep_time)
+    sleep()
     return client.get_tweet(x["id"],expansions=["author_id"]).includes["users"][0]["id"]
 
 def get_accounts_rted(ID,recursion_level=0):
@@ -52,7 +59,7 @@ def get_accounts_rted(ID,recursion_level=0):
                         limit=pages)
     k=0
     for page in public_tweets:
-        time.sleep(sleep_time)
+        sleep()
         for tweet in page.data:
             tweet_text=tweet["text"]
             k+=1
