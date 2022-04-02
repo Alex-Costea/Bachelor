@@ -11,13 +11,13 @@ client = tweepy.Client(bearer_token,wait_on_rate_limit=True)
 
 #global variables
 requests=0 #number of tweets that have been alayzed
-requests_max=2000 #number of requests before quitting
+requests_max=5000 #number of requests before quitting
 keywords=["onepiece","one piece","luffy","ワンピース"] 
 accounts_checked=set() #accounts that have already been analyzed
 pages=2 # 1 page = 100 tweets
 min_keywords=10 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
-sleep_time=2 #sleep time between requests
+sleep_time=3 #sleep time between requests
 sleep_count=0 #how many times it slept, for debugging purposes
 
 def sleep():
