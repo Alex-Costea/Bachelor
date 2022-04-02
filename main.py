@@ -12,12 +12,12 @@ client = tweepy.Client(bearer_token,wait_on_rate_limit=True)
 #global variables
 requests=0 #number of tweets that have been alayzed
 requests_max=2000 #number of requests before quitting
-keywords=["onepiece","one piece","luffy"] 
+keywords=["onepiece","one piece","luffy","ワンピース"] 
 accounts_checked=set() #accounts that have already been analyzed
 pages=2 # 1 page = 100 tweets
-min_keywords=5 #smallest number of keywords for an account to be valid
+min_keywords=10 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
-sleep_time=1.1
+sleep_time=2
 
 def get_id_from_username(name):
     user = client.get_user(username=name)
