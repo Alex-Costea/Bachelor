@@ -11,17 +11,19 @@ f.close()
 
 #global variables
 tweets_analyzed=0 #number of tweets that have been alayzed
-tweets_max=5000 #number of tweets before quitting
-keywords=["onepiece","one piece","luffy","ワンピース"] 
 accounts_checked=set() #accounts that have already been analyzed
+sleep_count=0 #how many times it slept, for debugging purposes
+edges=[]
+
+#parameters
+tweets_max=500 #number of tweets before quitting
+keywords=["onepiece","one piece","luffy","ワンピース"] 
 pages=2 # 1 page = 100 tweets
 min_keywords=10 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
-sleep_time=3 #sleep time between requests
-sleep_count=0 #how many times it slept, for debugging purposes
-edges=[]
-starting_username="Koishi_D_Sama"
+sleep_time=1 #sleep time between requests
 
+#sleep after doing a request in order to not get rate limited
 def sleep():
     global sleep_count
     #time.sleep(sleep_time)
@@ -42,10 +44,8 @@ def get_accounts_rted(ID):
     print("user ID:",ID)
     if ID in accounts_checked:
         return
-
     accounts_checked.add(ID)
     keywords_found=0
-
     accounts_found=defaultdict(int)
     public_tweets = tweepy.Paginator(
                         client.get_users_tweets,
@@ -54,6 +54,7 @@ def get_accounts_rted(ID):
                         tweet_fields=["referenced_tweets"],
                         expansions=["referenced_tweets.id,referenced_tweets.id.author_id"],
                         limit=pages)
+    
     k=0
     for page in public_tweets:
         sleep()
@@ -123,6 +124,10 @@ try:
 except FileNotFoundError:
     pass
 
+f=open("start.txt","r")
+starting_username=f.read()
+f.close()
+
 if old_cursor:
     accounts_checked.add(get_id_from_username(starting_username))
 else:
@@ -137,7 +142,7 @@ for x,y in edges:
         accounts_checked.add(y)
         continue
     write_cursor(k)
-    #if tweets_analyzed>=tweets_max:
-    #    print("reached tweet limit!")
-    #    break
+    if tweets_analyzed>=tweets_max:
+        print("reached tweet limit!")
+        break
     get_accounts_rted(y)
