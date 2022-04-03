@@ -16,10 +16,14 @@ sleep_count=0 #how many times it slept, for debugging purposes
 edges=[]
 
 #parameters
-tweets_max=500 #number of tweets before quitting
-keywords=["onepiece","one piece","luffy","ワンピース"] 
+tweets_max=50000 #number of tweets before quitting
+keywords=["anti-vax","antivax","VAERS","vaccinedeaths","vaccine death",
+          "vaccineinjur","vaccine injur", "vaccinemandate",
+          "mrna","side effect","experimental vaccine","ivermectin"
+          "gene therapy","blood clot","vaccine mandate",
+          "medical tyran","medical tyran","vitt","vaccinegenocide"] 
 pages=2 # 1 page = 100 tweets
-min_keywords=10 #smallest number of keywords for an account to be valid
+min_keywords=5 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
 sleep_time=1 #sleep time between requests
 
@@ -41,9 +45,9 @@ def get_user_id_from_referenced_tweet(x):
 
 def get_accounts_rted(ID):
     global tweets_analyzed
-    print("user ID:",ID)
     if ID in accounts_checked:
         return
+    print("user ID:",ID)
     accounts_checked.add(ID)
     keywords_found=0
     accounts_found=defaultdict(int)
@@ -63,6 +67,7 @@ def get_accounts_rted(ID):
             tweets_analyzed+=1
             tweet_text=tweet["text"]
             k+=1
+            
             #find keywords
             for key in keywords:
                 if re.search(key, tweet_text, re.IGNORECASE):
@@ -84,7 +89,7 @@ def get_accounts_rted(ID):
                             accounts_found[user_id]+=1
                             
     print("tweets analyzed for this account:",k)
-    if keywords_found>min_keywords:
+    if keywords_found>=min_keywords:
         print("keywords found:",keywords_found)
         print("edges added:")
         f = open("list.txt", "a")
@@ -94,8 +99,10 @@ def get_accounts_rted(ID):
                 edges.append((ID,k))
                 f.write(f"{ID} {k}\n")
         f.close()
+        
     else:
         print("account is irrelevant!")
+        print("keywords found:",keywords_found)
         with open("irrelevant.txt","a") as f:
              f.write(f"{ID}\n")
     print("\n")
@@ -137,9 +144,9 @@ k=0
 write_cursor(k)
 for x,y in edges:
     k+=1
-    print(x,y)
     if old_cursor and k<cursor:
         accounts_checked.add(y)
+        print(x,y)
         continue
     write_cursor(k)
     if tweets_analyzed>=tweets_max:
