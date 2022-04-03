@@ -11,7 +11,7 @@ f.close()
 
 #global variables
 tweets_analyzed=0 #number of tweets that have been alayzed
-tweets_max=500 #number of tweets before quitting
+tweets_max=5000 #number of tweets before quitting
 keywords=["onepiece","one piece","luffy","ワンピース"] 
 accounts_checked=set() #accounts that have already been analyzed
 pages=2 # 1 page = 100 tweets
@@ -26,26 +26,25 @@ def sleep():
     global sleep_count
     #time.sleep(sleep_time)
     sleep_count+=1
-    #print(sleep_count)
+    #print("sleep count:",sleep_count)
 
 def get_id_from_username(name):
     user = client.get_user(username=name)
     sleep()
     return user.data.id
 
-def get_user_id_from_tweet(x):
+def get_user_id_from_referenced_tweet(x):
     sleep()
     return client.get_tweet(x["id"],expansions=["author_id"]).includes["users"][0]["id"]
 
 def get_accounts_rted(ID):
     global tweets_analyzed
+    print("user ID:",ID)
     if ID in accounts_checked:
         return
 
     accounts_checked.add(ID)
     keywords_found=0
-    
-    print("user ID",ID)
 
     accounts_found=defaultdict(int)
     public_tweets = tweepy.Paginator(
@@ -53,10 +52,12 @@ def get_accounts_rted(ID):
                         ID,
                         max_results=100,
                         tweet_fields=["referenced_tweets"],
+                        expansions=["referenced_tweets.id,referenced_tweets.id.author_id"],
                         limit=pages)
     k=0
     for page in public_tweets:
         sleep()
+        users=page.includes["users"]
         for tweet in page.data:
             tweets_analyzed+=1
             tweet_text=tweet["text"]
@@ -65,14 +66,22 @@ def get_accounts_rted(ID):
             for key in keywords:
                 if re.search(key, tweet_text, re.IGNORECASE):
                     keywords_found+=1
+
+            #add to count if RT'ed
             referenced_tweets=tweet["referenced_tweets"]
             if referenced_tweets:
                 for x in referenced_tweets:
                     type_interaction=x["type"]
                     if type_interaction=="retweeted":
-                        user_id=get_user_id_from_tweet(x)
+                        username=tweet.data["text"].split(":")[0][4:] #idk a nicer way
+                        user_id_list=[x for x in users if x.username==username]
+                        if user_id_list:
+                            user_id=user_id_list[0].data["id"]
+                        else:
+                            user_id=get_user_id_from_referenced_tweet(x) 
                         if user_id!=ID:
                             accounts_found[user_id]+=1
+                            
     print("tweets analyzed for this account:",k)
     if keywords_found>min_keywords:
         print("keywords found:",keywords_found)
@@ -128,7 +137,7 @@ for x,y in edges:
         accounts_checked.add(y)
         continue
     write_cursor(k)
-    if tweets_analyzed>=tweets_max:
-        print("reached tweet limit!")
-        break
+    #if tweets_analyzed>=tweets_max:
+    #    print("reached tweet limit!")
+    #    break
     get_accounts_rted(y)
