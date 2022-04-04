@@ -62,6 +62,8 @@ def get_accounts_rted(ID):
     k=0
     for page in public_tweets:
         sleep()
+        if page.includes=={}:
+            break
         users=page.includes["users"]
         for tweet in page.data:
             tweets_analyzed+=1
@@ -149,7 +151,7 @@ for x,y in edges:
         print(x,y)
         continue
     write_cursor(k)
-    if tweets_analyzed>=tweets_max:
-        print("reached tweet limit!")
-        break
+    #if tweets_analyzed>=tweets_max:
+    #    print("reached tweet limit!")
+    #    break
     get_accounts_rted(y)
