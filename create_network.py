@@ -17,12 +17,13 @@ edges=[]
 
 #parameters
 tweets_max=50000 #number of tweets before quitting
-keywords=["anti-vax","antivax","VAERS","vaccinedeaths","vaccine death",
-          "vaccineinjur","vaccine injur", "vaccinemandate",
-          "mrna","side effect","experimental vaccine","ivermectin"
-          "gene therapy","blood clot","vaccine mandate",
-          "medical tyran","medical tyran","vitt","vaccinegenocide"] 
-pages=2 # 1 page = 100 tweets
+keywords=["anti-vax","antivax","vaccinedeath","vaxxdeath","vaxdeath",
+          "vaccineinjur","vaccinemandate","sideeffect","vaxmandate"
+          "experimentalvaccine","ivermectin","genetherapy","pfizergate",
+          "vaccinemandate","medicaltyran","vaers","vaccinegenocide",
+          "phizer","vaxinjur","vaxxinjur","vax-injur","vaxx-injur",
+          "jabbed","vaccinationregret","#pfizer","bigpharma"] 
+pages=4 # 1 page = 100 tweets
 min_keywords=5 #smallest number of keywords for an account to be valid
 min_rts=2 #smallest number of retweets for a link
 sleep_time=1 #sleep time between requests
@@ -72,7 +73,7 @@ def get_accounts_rted(ID):
             
             #find keywords
             for key in keywords:
-                if re.search(key, tweet_text, re.IGNORECASE):
+                if re.search(key, tweet_text.replace(" ", ""), re.IGNORECASE):
                     keywords_found+=1
 
             #add to count if RT'ed
