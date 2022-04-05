@@ -16,7 +16,7 @@ sleep_count=0 #how many times it slept, for debugging purposes
 edges=[]
 
 #parameters
-tweets_max=50000 #number of tweets before quitting
+tweets_max=5000 #number of tweets before quitting
 keywords=["anti-vax","antivax","vaccinedeath","vaxxdeath","vaxdeath",
           "vaccineinjur","vaccinemandate","sideeffect","vaxmandate"
           "experimentalvaccine","ivermectin","genetherapy","pfizergate",
@@ -38,7 +38,7 @@ def sleep():
 def get_id_from_username(name):
     user = client.get_user(username=name)
     sleep()
-    return user.data.id
+    return str(user.data.id)
 
 def get_user_id_from_referenced_tweet(x):
     sleep()
@@ -52,15 +52,16 @@ def get_accounts_rted(ID):
     accounts_checked.add(ID)
     keywords_found=0
     accounts_found=defaultdict(int)
+    influence=0
     public_tweets = tweepy.Paginator(
                         client.get_users_tweets,
                         ID,
                         max_results=100,
-                        tweet_fields=["referenced_tweets"],
+                        tweet_fields=["referenced_tweets,public_metrics"],
                         expansions=["referenced_tweets.id,referenced_tweets.id.author_id"],
                         limit=pages)
     
-    k=0
+    tweets_total=0
     for page in public_tweets:
         sleep()
         if page.includes=={}:
@@ -69,7 +70,7 @@ def get_accounts_rted(ID):
         for tweet in page.data:
             tweets_analyzed+=1
             tweet_text=tweet["text"]
-            k+=1
+            tweets_total+=1
             
             #find keywords
             for key in keywords:
@@ -78,36 +79,49 @@ def get_accounts_rted(ID):
 
             #add to count if RT'ed
             referenced_tweets=tweet["referenced_tweets"]
+            is_main_tweet=True
             if referenced_tweets:
                 for x in referenced_tweets:
                     type_interaction=x["type"]
                     if type_interaction=="retweeted":
+                        is_main_tweet=False
                         username=tweet.data["text"].split(":")[0][4:] #idk a nicer way
                         user_id_list=[x for x in users if x.username==username]
                         if user_id_list:
                             user_id=user_id_list[0].data["id"]
                         else:
-                            user_id=get_user_id_from_referenced_tweet(x) 
+                            user_id=get_user_id_from_referenced_tweet(x)
                         if user_id!=ID:
                             accounts_found[user_id]+=1
-                            
-    print("tweets analyzed for this account:",k)
-    if keywords_found>=min_keywords:
+                    if type_interaction=="replied_to":
+                        is_main_tweet=False
+            if is_main_tweet:
+                influence+=tweet["public_metrics"]["retweet_count"]
+    
+    print("tweets analyzed for this account:",tweets_total)
+    print("influence:",influence)
+    relevance=keywords_found>=min_keywords
+    if relevance:
         print("keywords found:",keywords_found)
         print("edges added:")
         f = open("list.txt", "a")
-        for k,v in accounts_found.items():
+        accounts_found_sorted=sorted(accounts_found.items(),
+                                     key=lambda kv:kv[1],
+                                     reverse=True)
+        for k,v in accounts_found_sorted:
             if v>=min_rts:
-                print(ID,k)
+                print(ID,k,v)
                 edges.append((ID,k))
-                f.write(f"{ID} {k}\n")
+                f.write(f"{ID} {k} {v}\n")
         f.close()
         
     else:
         print("account is irrelevant!")
         print("keywords found:",keywords_found)
-        with open("irrelevant.txt","a") as f:
-             f.write(f"{ID}\n")
+
+    with open("details.txt","a") as f:
+        f.write(f"{ID} {keywords_found} {tweets_total} {influence}\n")
+    
     print("\n")
 
 def write_cursor(cursor):
@@ -152,7 +166,7 @@ for x,y in edges:
         print(x,y)
         continue
     write_cursor(k)
-    #if tweets_analyzed>=tweets_max:
-    #    print("reached tweet limit!")
-    #    break
+    if tweets_analyzed>=tweets_max:
+        print("reached tweet limit!")
+        break
     get_accounts_rted(y)
