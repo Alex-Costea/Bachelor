@@ -16,7 +16,7 @@ sleep_count=0 #how many times it slept, for debugging purposes
 edges=[]
 
 #parameters
-tweets_max=5000 #number of tweets before quitting
+tweets_max=50000 #number of tweets before quitting
 keywords=["anti-vax","antivax","vaccinedeath","vaxxdeath","vaxdeath",
           "vaccineinjur","vaccinemandate","sideeffect","vaxmandate"
           "experimentalvaccine","ivermectin","genetherapy","pfizergate",
@@ -166,7 +166,7 @@ for x,y in edges:
         print(x,y)
         continue
     write_cursor(k)
-    if tweets_analyzed>=tweets_max:
-        print("reached tweet limit!")
-        break
+    #if tweets_analyzed>=tweets_max:
+    #    print("reached tweet limit!")
+    #    break
     get_accounts_rted(y)
