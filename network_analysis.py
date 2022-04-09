@@ -1,7 +1,7 @@
 import networkx
 from dataclasses import dataclass
 from collections import defaultdict
-from math import log
+from math import log2
 
 class NodeItem:
     ID: str
@@ -49,7 +49,7 @@ with open("details.txt","r") as details_file, \
     for line in lines:
         edge=line.strip().split()
         if edge[0] in relevant_nodes and edge[1] in relevant_nodes:
-            G.add_edge(edge[0],edge[1],weight=log(float(edge[2])))
+            G.add_edge(edge[0],edge[1],weight=log2(float(edge[2])))
 
 #in-eigenvector centrality
 in_centrality=networkx.eigenvector_centrality(G,max_iter=100)
