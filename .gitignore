@@ -4,6 +4,7 @@ list.txt
 start.txt
 details.txt
 data.sav
+old/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
