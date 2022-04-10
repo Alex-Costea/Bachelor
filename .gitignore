@@ -1,9 +1,9 @@
 token.txt
 cursor.txt
-irrelevant.txt
 list.txt
 start.txt
 details.txt
+data.sav
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
