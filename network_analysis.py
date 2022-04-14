@@ -8,6 +8,7 @@ import pyreadstat
 NodeItem = make_dataclass("NodeItem", [("ID", str),
                                        ("keywords", int),
                                        ("influence",int),
+                                       ("tweets",int),
                                        ("in_centrality", float),
                                        ("out_centrality", float)])
 
@@ -22,9 +23,10 @@ with open("details.txt","r") as details_file, \
     for line in details_file.readlines():
         details=line.strip().split()
         keywords=int(details[1])
-        node=NodeItem(details[0],keywords,0,0,0)
+        node=NodeItem(details[0],keywords,0,0,0,0)
         if float(details[2])==0:
             continue
+        node.tweets=float(details[2])
         node.influence=int(float(details[3]))
         nodes_analyzed[node.ID]=node
         if keywords>=5:
@@ -44,27 +46,26 @@ deemed_irrelevant_sorted=sorted(deemed_irrelevant.items(),
 for k,v in deemed_irrelevant_sorted[:50]:
     relevant_nodes.add(k)
 
-    
 #add nodes
 for line in lines:
     edge=line.strip().split()
     if edge[0] in relevant_nodes and edge[1] in relevant_nodes:
         G.add_edge(edge[0],edge[1],weight=log2(float(edge[2])))
 
-multiply_constant=1000000000
+multiply_constant=1
 
 #in-eigenvector centrality
 in_centrality=networkx.eigenvector_centrality(G,max_iter=100)
 in_centrality=sorted(in_centrality.items(),key=lambda kv:kv[1],reverse=True)
 for ID,centrality in in_centrality:
-    nodes_analyzed[ID].in_centrality=centrality
+    nodes_analyzed[ID].in_centrality=centrality*multiply_constant
 
 #out-eigenvector centrality
 G=G.reverse()
 out_centrality=networkx.eigenvector_centrality(G,max_iter=100)
 out_centrality=sorted(out_centrality.items(),key=lambda kv:kv[1],reverse=True)
 for ID,centrality in out_centrality:
-    nodes_analyzed[ID].out_centrality=centrality
+    nodes_analyzed[ID].out_centrality=centrality*multiply_constant
 
 data=pd.DataFrame([nodes_analyzed[x] for x in relevant_nodes])
 print(data)
