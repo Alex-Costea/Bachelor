@@ -7,10 +7,11 @@ import pyreadstat
 
 NodeItem = make_dataclass("NodeItem", [("ID", str),
                                        ("keywords", int),
-                                       ("influence",int),
+                                       ("retweets",int),
                                        ("tweets",int),
                                        ("in_centrality", float),
-                                       ("out_centrality", float)])
+                                       ("out_centrality", float),
+                                       ("retweets_normalized", int)])
 
 nodes_analyzed=dict()
 relevant_nodes=set()
@@ -23,11 +24,12 @@ with open("details.txt","r") as details_file, \
     for line in details_file.readlines():
         details=line.strip().split()
         keywords=int(details[1])
-        node=NodeItem(details[0],keywords,0,0,0,0)
+        node=NodeItem(details[0],keywords,0,0,0,0,0)
         if float(details[2])==0:
             continue
         node.tweets=float(details[2])
-        node.influence=int(float(details[3]))
+        node.retweets=int(float(details[3]))
+        node.retweets_normalized=node.retweets/node.tweets*400
         nodes_analyzed[node.ID]=node
         if keywords>=5:
             relevant_nodes.add(node.ID)
@@ -53,6 +55,9 @@ for line in lines:
         G.add_edge(edge[0],edge[1],weight=log2(float(edge[2])))
 
 multiply_constant=1
+
+#write graph to gephi
+networkx.write_gexf(G,"data.gexf")
 
 #in-eigenvector centrality
 in_centrality=networkx.eigenvector_centrality(G,max_iter=100)
