@@ -57,6 +57,10 @@ for line in lines:
 multiply_constant=1
 
 #write graph to gephi
+networkx.set_node_attributes(G,0,"influence")
+for x in G.nodes:
+    G.nodes[x]["influence"]=nodes_analyzed[x].retweets_normalized
+    #print(x,G.nodes[x]["influence"])
 networkx.write_gexf(G,"data.gexf")
 
 #in-eigenvector centrality
